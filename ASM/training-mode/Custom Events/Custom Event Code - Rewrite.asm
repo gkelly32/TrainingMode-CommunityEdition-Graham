@@ -7246,6 +7246,10 @@ LedgetechCounterThink_Recovering:
     b LedgetechCounterThink_CheckForTimer
 
 LedgetechCounterThink_Recovering_CheckDistanceAndInputDownB:
+    # Check Action State
+    lwz r3, 0x10(P1Data)
+    cmpwi r3, 356
+    bne LedgetechCounterThink_CheckForTimer
     # Check P1s Distance from Marth
     addi r3, P1Data, 0xB0
     addi r4, P2Data, 0xB0
@@ -7552,7 +7556,7 @@ LedgetechCounter_DetermineTechInputTimingMessageCategory_Exit:
 ######
 LedgetechCounter_Constants:
     blrl
-    .float 33                                           # Mm away from fox to init counter
+    .float 40                                           # Mm away from fox to init counter
     .float 5                                            # Mm to move marth forward after placing on ledge
     .float -15                                          # Mm to move spacies down after placing in the air
 
