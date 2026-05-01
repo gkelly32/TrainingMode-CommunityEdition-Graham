@@ -1,22 +1,15 @@
 #include "ledgedash.h"
 
-static GXColor tmgbar_black = {40, 40, 40, 255};
-static GXColor tmgbar_grey = {120, 120, 120, 255};
-static GXColor tmgbar_blue = {128, 128, 255, 255};
-static GXColor tmgbar_green = {128, 255, 128, 255};
-static GXColor tmgbar_cyan = {52, 202, 228, 255};
-static GXColor tmgbar_red = {255, 128, 128, 255};
-static GXColor tmgbar_magenta = {230, 22, 198, 255};
-static GXColor tmgbar_white = {255, 255, 255, 255};
-static GXColor *tmgbar_colors[] = {
-    &tmgbar_black,
-    &tmgbar_grey,
-    &tmgbar_green,
-    &tmgbar_cyan,
-    &tmgbar_magenta,
-    &tmgbar_white,
-    &tmgbar_red,
-    &tmgbar_blue,
+static GXColor action_colors[] = {
+    {40, 40, 40, 180},
+    {120, 120, 120, 180},
+    {128, 255, 128, 180},
+    {80, 160, 80, 180},
+    {52, 202, 228, 180},
+    {230, 22, 198, 180},
+    {255, 255, 255, 180},
+    {255, 128, 128, 180},
+    {128, 128, 255, 180},
 };
 
 enum menu_options
@@ -252,14 +245,12 @@ void Event_Think(GOBJ *event)
             GXColor color;
             if (action == LDACT_NONE) {
                 if (hmn_data->hurt.intang_frames.ledge != 0) {
-                    color = tmgbar_blue;
-                    color.a = 180;
+                    color = action_colors[LDACT_GALINT];
                 } else {
                     color = (GXColor) {0, 0, 0, 0};
                 }
             } else {
-                color = *tmgbar_colors[action];
-                color.a = 180;
+                color = action_colors[action];
             }
 
             hmn_data->color[1].hex = color;
@@ -658,17 +649,6 @@ void Ledgedash_HitLogGX(GOBJ *gobj, int pass)
     
     if (pass == 2) {
         LedgedashData *event_data = event_vars->event_gobj->userdata;
-        static GXColor colors[] = {
-            {40, 40, 40, 180},
-            {120, 120, 120, 180},
-            {128, 255, 128, 180},
-            {80, 160, 80, 180},
-            {52, 202, 228, 180},
-            {230, 22, 198, 180},
-            {255, 255, 255, 180},
-            {255, 128, 128, 180},
-            {128, 128, 255, 180},
-        };
         static char *names[] = {
             "Cliffwait",
             "Fall",
@@ -681,12 +661,12 @@ void Ledgedash_HitLogGX(GOBJ *gobj, int pass)
         };
         event_vars->HUD_DrawActionLogBar(
             event_data->action_state.action_log,
-            colors,
+            action_colors,
             countof(event_data->action_state.action_log)
         );
         event_vars->HUD_DrawActionLogKey(
             names,
-            &colors[1],
+            &action_colors[1],
             countof(names)
         );
     }
