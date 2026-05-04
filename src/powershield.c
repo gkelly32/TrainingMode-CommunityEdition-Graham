@@ -1,11 +1,9 @@
 #include "../MexTK/mex.h"
 #include "events.h"
 
-#define CPU_LEFT_STAGE_POS_X 70.f
-#define CPU_LEFT_DIRECTION -1.f
-
-#define FULL_FALCO_SHORTHOP_DISTANCE 30.f // TODO: adjust
-#define SLIGHT_FALCO_SHORTHOP_DISTANCE 15.f // TODO: adjust
+#define LEDGE_X 70.f
+#define FULL_FALCO_SHORTHOP_DISTANCE 30.f
+#define SLIGHT_FALCO_SHORTHOP_DISTANCE 13.f
 
 void Exit(GOBJ *menu);
 void ChangeFireSpeedOption(GOBJ *event_menu, int value);
@@ -204,11 +202,16 @@ void Event_Think(GOBJ *menu) {
     if (ground_actionable && falco_wait_delay == 0) {
         // choose shoot type
         if (falco_shoot_direction == 0) {
+            float falco_x = falco_data->phys.pos.X;
+            float player_x = player_data->phys.pos.X;
+        
+            float approaching_dir = player_x < falco_x ? -1.f : 1.f;
+            float retreating_dir = -approaching_dir;
             bool can_in_place = true;
-            bool can_full_approach = true;
-            bool can_slight_approach = true;
-            bool can_full_retreat = fabs(falco_data->phys.pos.X) < (CPU_LEFT_STAGE_POS_X - FULL_FALCO_SHORTHOP_DISTANCE); // TODO: test
-            bool can_slight_retreat = fabs(falco_data->phys.pos.X) < (CPU_LEFT_STAGE_POS_X - SLIGHT_FALCO_SHORTHOP_DISTANCE); // TODO: test
+            bool can_full_approach = fabs(falco_x + FULL_FALCO_SHORTHOP_DISTANCE*approaching_dir) < LEDGE_X;
+            bool can_slight_approach = fabs(falco_x + SLIGHT_FALCO_SHORTHOP_DISTANCE*approaching_dir) < LEDGE_X;
+            bool can_full_retreat = fabs(falco_x + FULL_FALCO_SHORTHOP_DISTANCE*retreating_dir) < LEDGE_X;
+            bool can_slight_retreat = fabs(falco_x + SLIGHT_FALCO_SHORTHOP_DISTANCE*retreating_dir) < LEDGE_X;
 
             typedef struct {
                 int in_place_odds;
