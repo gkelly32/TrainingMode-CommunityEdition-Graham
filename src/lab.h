@@ -7,6 +7,7 @@
 
 static ShortcutList Lab_ShortcutList;
 static EventMenu LabMenu_General;
+static EventMenu LabMenu_Controls;
 static EventMenu LabMenu_OverlaysHMN;
 static EventMenu LabMenu_OverlaysCPU;
 static EventMenu LabMenu_InfoDisplayHMN;
@@ -986,12 +987,10 @@ static EventOption LabOptions_Main[OPTLAB_COUNT] = {
         .desc = {"Configure stage behavior."},
     },
     {
-        .kind = OPTKIND_INFO,
-        .name = "Help",
-        .desc = {"D-Pad Left - Load State",
-                 "D-Pad Right - Save State",
-                 "D-Pad Down - Move CPU",
-                 "Hold R in the menu for turbo."},
+        .kind = OPTKIND_MENU,
+        .menu = &LabMenu_Controls,
+        .name = "Controls",
+        .desc = {"Change controls for lab options."}
     },
     {
         .kind = OPTKIND_FUNC,
@@ -1005,6 +1004,111 @@ static EventMenu LabMenu_Main = {
     .name = "Main Menu",
     .option_num = sizeof(LabOptions_Main) / sizeof(EventOption),
     .options = LabOptions_Main,
+    .shortcuts = &Lab_ShortcutList,
+};
+
+// CONTROLS MENU --------------------------------------------------------------
+
+enum lab_controls {
+    OPTCTRL_FRAME_ADVANCE,
+    OPTCTRL_FRAME_DECREMENT,
+    OPTCTRL_DPAD_UP,
+    OPTCTRL_DPAD_DOWN,
+    OPTCTRL_DPAD_LEFT,
+    OPTCTRL_DPAD_RIGHT,
+
+    OPTCTRL_COUNT
+};
+
+enum lab_dpad_up {
+    DPAD_U_TAUNT,
+    DPAD_U_DISABLED,
+};
+
+enum lab_dpad_down {
+    DPAD_D_PLACE_CPU,
+    DPAD_D_DISABLED,
+    DPAD_D_FRAME_ADVANCE,
+};
+
+enum lab_dpad_left {
+    DPAD_L_LOAD_STATE,
+    DPAD_L_DISABLED,
+};
+
+enum lab_dpad_right {
+    DPAD_R_SAVE_STATE,
+    DPAD_R_DISABLED,
+};
+
+// These options are serialized: do not re-order
+static const char *LabOptions_FrameAdvButton[] = {"L", "Z", "X", "Y", "R"};
+static const char *LabOptions_FrameDecButton[] = {"None", "Z", "L", "R", "X", "Y"};
+static const char *LabOptions_DPadUp[] = {"Taunt", "None"};
+static const char *LabOptions_DPadDown[] = {"Place CPU", "None", "Frame Advance"};
+static const char *LabOptions_DPadLeft[] = {"Load State", "None"};
+static const char *LabOptions_DPadRight[] = {"Save State", "None"};
+
+static int LabValues_FrameAdvButtonMask[] = {HSD_TRIGGER_L, HSD_TRIGGER_Z, HSD_BUTTON_X, HSD_BUTTON_Y, HSD_TRIGGER_R};
+static int LabValues_FrameDecButtonMask[] = {0, HSD_TRIGGER_Z, HSD_TRIGGER_L, HSD_TRIGGER_R, HSD_BUTTON_X, HSD_BUTTON_Y};
+
+static EventOption LabOptions_Controls[OPTCTRL_COUNT] = {
+    {
+        .kind = OPTKIND_STRING,
+        .name = "Frame Advance Button",
+        .desc = {"The button to advance a frame.",
+                 "Hold to advance at normal speed."},
+        .values = LabOptions_FrameAdvButton,
+        .value_num = countof(LabOptions_FrameAdvButton),
+        .OnChange = Lab_ChangeFrameAdvanceButton,
+    },
+    {
+        .kind = OPTKIND_STRING,
+        .name = "Frame Decrement Button",
+        .desc = {"The button to go back one frame.",
+                 "Only works during playback."},
+        .values = LabOptions_FrameDecButton,
+        .value_num = countof(LabOptions_FrameDecButton),
+        .OnChange = Lab_ChangeFrameDecrementButton,
+    },
+    {
+        .kind = OPTKIND_STRING,
+        .name = "DPad Up",
+        .desc = {"Change what D-pad up does."},
+        .values = LabOptions_DPadUp,
+        .value_num = countof(LabOptions_DPadUp),
+        .OnChange = Lab_ChangeDPadOption,
+    },
+    {
+        .kind = OPTKIND_STRING,
+        .name = "DPad Down",
+        .desc = {"Change what D-pad down does."},
+        .values = LabOptions_DPadDown,
+        .value_num = countof(LabOptions_DPadDown),
+        .OnChange = Lab_ChangeDPadOption,
+    },
+    {
+        .kind = OPTKIND_STRING,
+        .name = "DPad Left",
+        .desc = {"Change what D-pad left does."},
+        .values = LabOptions_DPadLeft,
+        .value_num = countof(LabOptions_DPadLeft),
+        .OnChange = Lab_ChangeDPadOption,
+    },
+    {
+        .kind = OPTKIND_STRING,
+        .name = "DPad Right",
+        .desc = {"Change what D-pad right does."},
+        .values = LabOptions_DPadRight,
+        .value_num = countof(LabOptions_DPadRight),
+        .OnChange = Lab_ChangeDPadOption,
+    },
+};
+
+static EventMenu LabMenu_Controls = {
+    .name = "Controls",
+    .option_num = sizeof(LabOptions_Controls) / sizeof(EventOption),
+    .options = LabOptions_Controls,
     .shortcuts = &Lab_ShortcutList,
 };
 
@@ -1026,8 +1130,6 @@ enum model_display {
 enum gen_option
 {
     OPTGEN_FRAME,
-    OPTGEN_FRAMEBTN,
-    OPTGEN_FRAMEBTNREV,
     OPTGEN_HMNPCNT,
     OPTGEN_HMNPCNTLOCK,
     OPTGEN_MODEL,
@@ -1043,7 +1145,6 @@ enum gen_option
     OPTGEN_SPEED,
     OPTGEN_STALE,
     OPTGEN_POWERSHIELD,
-    OPTGEN_TAUNT,
     OPTGEN_CUSTOM_OSD,
     OPTLAB_ACTIONLOG,
     OPTLAB_HITBOXTRAILS,
@@ -1054,11 +1155,6 @@ enum gen_option
 
 static const char *LabOptions_CamMode[] = {"Normal", "Zoom", "Fixed", "Advanced", "Static"};
 static const char *LabOptions_ShowInputs[] = {"Off", "HMN", "CPU", "HMN and CPU"};
-static const char *LabOptions_FrameAdvButton[] = {"L", "Z", "X", "Y", "R"};
-static const char *LabOptions_FrameDecButton[] = {"None", "Z", "L", "R", "X", "Y"};
-
-static int LabValues_FrameAdvButtonMask[] = {HSD_TRIGGER_L, HSD_TRIGGER_Z, HSD_BUTTON_X, HSD_BUTTON_Y, HSD_TRIGGER_R};
-static int LabValues_FrameDecButtonMask[] = {0, HSD_TRIGGER_Z, HSD_TRIGGER_L, HSD_TRIGGER_R, HSD_BUTTON_X, HSD_BUTTON_Y};
 
 static const char *LabOptions_ModelDisplay[] = {"On", "Stage Only", "Characters Only"};
 static const bool LabValues_CharacterModelDisplay[] = {true, false, true};
@@ -1072,27 +1168,6 @@ static EventOption LabOptions_General[OPTGEN_COUNT] = {
         .kind = OPTKIND_TOGGLE,
         .name = "Frame Advance",
         .desc = {"Enable frame advance."},
-        .OnChange = Lab_ChangeFrameAdvance,
-    },
-    {
-        .kind = OPTKIND_STRING,
-        .value_num = sizeof(LabOptions_FrameAdvButton) / 4,
-        .name = "Frame Advance Button",
-        .desc = {"The button to advance a frame.",
-                 "Hold to advance at normal speed."},
-        .values = LabOptions_FrameAdvButton,
-        .OnChange = Lab_ChangeFrameAdvanceButton,
-        .disable = 1,
-    },
-    {
-        .kind = OPTKIND_STRING,
-        .value_num = sizeof(LabOptions_FrameDecButton) / 4,
-        .name = "Frame Decrement Button",
-        .desc = {"The button to go back one frame.",
-                 "Only works during playback."},
-        .values = LabOptions_FrameDecButton,
-        .OnChange = Lab_ChangeFrameDecrementButton,
-        .disable = 1,
     },
     {
         .kind = OPTKIND_INT,
@@ -1208,13 +1283,6 @@ static EventOption LabOptions_General[OPTGEN_COUNT] = {
         .kind = OPTKIND_TOGGLE,
         .name = "Powershield Projectiles",
         .desc = {"Projectiles will always be reflected when shielded."},
-    },
-    {
-        .kind = OPTKIND_TOGGLE,
-        .val = 1,
-        .name = "Disable Taunt",
-        .desc = {"Disable the taunt button (D-pad up)"},
-        .OnChange = Lab_ChangeTauntEnabled,
     },
     {
         .kind = OPTKIND_MENU,
