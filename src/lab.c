@@ -51,7 +51,14 @@ static char *slots_names[] = {"A", "B"};
 
 // timer variables
 static int lockout_timer = 0;
-const int LOCKOUT_DURATION = 30;
+static const int LOCKOUT_DURATION = 30;
+
+// Aitch: It is unfortunately very difficult to detect if a powershield occurred this frame.
+// The method I chose is to shield when a projectile is close by, force a powershield for n frames,
+// then perform a counter action after that window.
+// This timer counts down those n frames.
+static int stc_powershield_timer = -1;
+static const int stc_powershield_window = 4;
 
 static float cpu_locked_percent = 0;
 static float hmn_locked_percent = 0;
@@ -1285,7 +1292,14 @@ int CPUAction_CheckASID(GOBJ *cpu, int asid_kind)
                 || cpu_state == ASID_RUN
                 || cpu_state == ASID_SQUATWAIT
                 || cpu_state == ASID_OTTOTTOWAIT
-                || cpu_state == ASID_GUARD;
+                || cpu_state == ASID_GUARD
+                || cpu_state == ASID_GUARDREFLECT;
+        }
+
+        case (ASID_ACTIONABLESHIELD):
+        {
+            return cpu_state == ASID_GUARD
+                || cpu_state == ASID_GUARDREFLECT;
         }
 
         // check normal action states
@@ -1550,6 +1564,7 @@ void CPUResetVars(void) {
 
     eventData->counter_slot_frame = 0;
     stc_rndm_counter_slot = -1;
+    stc_powershield_timer = -1;
 }
 
 void CPUOnHit(void) {
@@ -2006,6 +2021,58 @@ void CPUThink(GOBJ *event, GOBJ *hmn, GOBJ *cpu)
         {
             // run jump command
             Lab_CPUPerformAction(cpu, CPUACT_SHORTHOP, hmn);
+            break;
+        }
+
+        case (CPUBEHAVE_POWERSHIELD):
+        {
+            Vec3 shield_pos = cpu_data->coll_data.topN_Curr;
+            shield_pos.X += cpu_data->coll_data.ecbCurr_top.X;
+            shield_pos.Y += cpu_data->coll_data.ecbCurr_left.Y;
+            float shield_size = cpu_data->attr.initial_shield_size;
+
+            bool shield = false;
+            for (GOBJ *item = (*stc_gobj_lookup)[MATCHPLINK_ITEM]; item; item = item->next) {
+                ItemData *item_data = item->userdata;
+                for (u32 i = 0; i < countof(item_data->hitbox); ++i) {
+                    itHit *hit = &item_data->hitbox[i];
+                    if (!hit->active) continue;
+                    Vec3 pos = item_data->pos;
+                    pos.X += item_data->self_vel.X;
+                    pos.Y += item_data->self_vel.Y;
+                    pos.Z += item_data->self_vel.Z;
+                    pos.X += hit->offset.X;
+                    pos.Y += hit->offset.Y;
+                    pos.Z += hit->offset.Z;
+
+                    Vec3 to_shield = { pos.X - shield_pos.X, pos.Y - shield_pos.Y, pos.Z - shield_pos.Z };
+                    to_shield.X *= to_shield.X;
+                    to_shield.Y *= to_shield.Y;
+                    to_shield.Z *= to_shield.Z;
+                    float dist_to_shield_sq = to_shield.X + to_shield.Y + to_shield.Z;
+                    float min_dist_to_shield_sq = shield_size + hit->size;
+                    min_dist_to_shield_sq *= min_dist_to_shield_sq;
+
+                    shield |= dist_to_shield_sq <= min_dist_to_shield_sq;
+                }
+            }
+
+            if (shield)
+                stc_powershield_timer = stc_powershield_window;
+
+            if (stc_powershield_timer > 0) {
+                stc_powershield_timer--;
+                cpu_data->cpu.held |= PAD_TRIGGER_R;
+                cpu_data->flags.reflect_enable = 1;
+                cpu_data->reflect_bubble.size_mult = cpu_data->shield_bubble.size_mult;
+            } else if (stc_powershield_timer == 0) {
+                stc_powershield_timer = -1;
+                eventData->cpu_hitnum++;
+                eventData->cpu_state = CPUSTATE_COUNTER;
+                eventData->cpu_hitkind = HITKIND_SHIELD;
+                goto CPULOGIC_COUNTER;
+            }
+
             break;
         }
         }
@@ -6653,19 +6720,6 @@ void Event_Think(GOBJ *event)
                 FighterData *data = fighter->userdata;
                 data->shield.health = health;
             }
-        }
-    }
-    
-    if (LabOptions_General[OPTGEN_POWERSHIELD].val) {
-        if (cpu_data->shield_bubble.bone) {
-            memcpy((u8*)&cpu_data->reflect_bubble, (u8*)&cpu_data->shield_bubble, sizeof(cpu_data->shield_bubble));
-            cpu_data->flags.reflect_enable = 1;
-            
-            cpu_data->reflect_hit = (struct reflect_hit) {
-                .max_dmg = 10000000,
-                .dmg_mult = 0.5f,
-                .is_break = 0,
-            };
         }
     }
     

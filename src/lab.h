@@ -81,8 +81,8 @@ enum custom_asid_groups
     ASID_ACTIONABLE = 1000,
     ASID_ACTIONABLEGROUND,
     ASID_ACTIONABLEAIR,
+    ASID_ACTIONABLESHIELD,
     ASID_DAMAGEAIR,
-    ASID_CROUCH,
     ASID_ANY,
 };
 
@@ -131,12 +131,7 @@ static CPUAction Lab_CPUActionShield[] = {
         .isLast    = 1,
     },
     {
-        .state     = ASID_GUARDREFLECT,
-        .input     = PAD_TRIGGER_R,
-        .isLast    = 1,
-    },
-    {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R,
         .isLast    = 1,
     },
@@ -144,7 +139,7 @@ static CPUAction Lab_CPUActionShield[] = {
 };
 static CPUAction Lab_CPUActionGrab[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_BUTTON_A | PAD_TRIGGER_R,
         .isLast    = 1,
     },
@@ -207,12 +202,8 @@ static CPUAction Lab_CPUActionDashAttack[] = {
 };
 static CPUAction Lab_CPUActionUpB[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
-    },
-    {
-        .state     = ASID_GUARD,
-        .input     = PAD_BUTTON_X,
     },
     {
         .state     = ASID_KNEEBEND,
@@ -230,12 +221,8 @@ static CPUAction Lab_CPUActionUpB[] = {
 };
 static CPUAction Lab_CPUActionSideBToward[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
-    },
-    {
-        .state     = ASID_GUARD,
-        .input     = PAD_BUTTON_X,
     },
     {
         .state     = ASID_ACTIONABLE,
@@ -248,12 +235,8 @@ static CPUAction Lab_CPUActionSideBToward[] = {
 };
 static CPUAction Lab_CPUActionSideBAway[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
-    },
-    {
-        .state     = ASID_GUARD,
-        .input     = PAD_BUTTON_X,
     },
     {
         .state     = ASID_ACTIONABLE,
@@ -266,13 +249,8 @@ static CPUAction Lab_CPUActionSideBAway[] = {
 };
 static CPUAction Lab_CPUActionDownB[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
-    },
-    {
-        .state     = ASID_GUARD,
-        .input     = PAD_BUTTON_X,
-        .isLast    = 1,
     },
     {
         .state     = ASID_ACTIONABLE,
@@ -284,15 +262,9 @@ static CPUAction Lab_CPUActionDownB[] = {
 };
 static CPUAction Lab_CPUActionNeutralB[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
-    {
-        .state     = ASID_GUARD,
-        .input     = PAD_BUTTON_X,
-        .isLast    = 1,
-    },
-
     {
         .state     = ASID_ACTIONABLE,
         .input     = PAD_BUTTON_B,
@@ -312,7 +284,7 @@ static CPUAction Lab_CPUActionSpotdodge[] = {
         .input     = PAD_TRIGGER_R,
     },
     {
-        .state     = ASID_GUARDREFLECT,
+        .state     = ASID_ACTIONABLESHIELD,
         .stickY    = -127,
         .input     = PAD_TRIGGER_R,
     },
@@ -324,7 +296,7 @@ static CPUAction Lab_CPUActionSpotdodge[] = {
 };
 static CPUAction Lab_CPUActionRollAway[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .stickX    = 127,
         .input     = PAD_TRIGGER_R,
         .isLast    = 1,
@@ -333,19 +305,12 @@ static CPUAction Lab_CPUActionRollAway[] = {
     {
         .state     = ASID_ACTIONABLEGROUND,
         .input     = PAD_TRIGGER_R,
-    },
-    {
-        .state     = ASID_GUARDREFLECT,
-        .stickX    = 127,
-        .input     = PAD_TRIGGER_R,
-        .isLast    = 1,
-        .stickDir  = STCKDIR_AWAY,
     },
     ActionEnd
 };
 static CPUAction Lab_CPUActionRollTowards[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .stickX    = 127,
         .input     = PAD_TRIGGER_R,
         .isLast    = 1,
@@ -354,19 +319,12 @@ static CPUAction Lab_CPUActionRollTowards[] = {
     {
         .state     = ASID_ACTIONABLEGROUND,
         .input     = PAD_TRIGGER_R,
-    },
-    {
-        .state     = ASID_GUARDREFLECT,
-        .stickX    = 127,
-        .input     = PAD_TRIGGER_R,
-        .isLast    = 1,
-        .stickDir  = STCKDIR_TOWARD,
     },
     ActionEnd
 };
 static CPUAction Lab_CPUActionRollRandom[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .stickX    = 127,
         .input     = PAD_TRIGGER_R,
         .isLast    = 1,
@@ -376,18 +334,11 @@ static CPUAction Lab_CPUActionRollRandom[] = {
         .state     = ASID_ACTIONABLEGROUND,
         .input     = PAD_TRIGGER_R,
     },
-    {
-        .state     = ASID_GUARDREFLECT,
-        .stickX    = 127,
-        .input     = PAD_TRIGGER_R,
-        .isLast    = 1,
-        .stickDir  = STICKDIR_RDM,
-    },
     ActionEnd
 };
 static CPUAction Lab_CPUActionNair[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -403,7 +354,7 @@ static CPUAction Lab_CPUActionNair[] = {
 };
 static CPUAction Lab_CPUActionFair[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -420,7 +371,7 @@ static CPUAction Lab_CPUActionFair[] = {
 };
 static CPUAction Lab_CPUActionDair[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -436,7 +387,7 @@ static CPUAction Lab_CPUActionDair[] = {
 };
 static CPUAction Lab_CPUActionBair[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -453,7 +404,7 @@ static CPUAction Lab_CPUActionBair[] = {
 };
 static CPUAction Lab_CPUActionUair[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -469,7 +420,7 @@ static CPUAction Lab_CPUActionUair[] = {
 };
 static CPUAction Lab_CPUActionJump[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -485,7 +436,7 @@ static CPUAction Lab_CPUActionJump[] = {
 };
 static CPUAction Lab_CPUActionJumpFull[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -672,7 +623,7 @@ static CPUAction Lab_CPUActionFSmash[] = {
 };
 static CPUAction Lab_CPUActionUpSmashOOS[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -684,7 +635,7 @@ static CPUAction Lab_CPUActionUpSmashOOS[] = {
 };
 static CPUAction Lab_CPUActionWavedashAway[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -703,7 +654,7 @@ static CPUAction Lab_CPUActionWavedashAway[] = {
 };
 static CPUAction Lab_CPUActionWavedashTowards[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -722,7 +673,7 @@ static CPUAction Lab_CPUActionWavedashTowards[] = {
 };
 static CPUAction Lab_CPUActionWavedashDown[] = {
     {
-        .state     = ASID_GUARD,
+        .state     = ASID_ACTIONABLESHIELD,
         .input     = PAD_TRIGGER_R | PAD_BUTTON_X,
     },
     {
@@ -1144,7 +1095,6 @@ enum gen_option
     OPTGEN_INPUT,
     OPTGEN_SPEED,
     OPTGEN_STALE,
-    OPTGEN_POWERSHIELD,
     OPTGEN_CUSTOM_OSD,
     OPTLAB_ACTIONLOG,
     OPTLAB_HITBOXTRAILS,
@@ -1278,11 +1228,6 @@ static EventOption LabOptions_General[OPTGEN_COUNT] = {
         .name = "Move Staling",
         .desc = {"Toggle the staling of moves. Attacks become ",
                  "weaker the more they are used."},
-    },
-    {
-        .kind = OPTKIND_TOGGLE,
-        .name = "Powershield Projectiles",
-        .desc = {"Projectiles will always be reflected when shielded."},
     },
     {
         .kind = OPTKIND_MENU,
@@ -2027,6 +1972,7 @@ enum cpu_behave
     CPUBEHAVE_SHIELD,
     CPUBEHAVE_CROUCH,
     CPUBEHAVE_JUMP,
+    CPUBEHAVE_POWERSHIELD,
 
     CPUBEHAVE_COUNT
 };
@@ -2196,7 +2142,7 @@ enum cpu_option
 
 static const char *LabValues_Shield[] = {"Off", "On Until Hit", "On"};
 static const char *LabValues_ShieldDir[] = {"Neutral", "Up", "Towards", "Down", "Away"};
-static const char *LabValues_CPUBehave[] = {"Stand", "Shield", "Crouch", "Jump"};
+static const char *LabValues_CPUBehave[] = {"Stand", "Shield", "Crouch", "Jump", "Powershield"};
 static const char *LabValues_TDI[] = {"Random", "Inwards", "Outwards", "Natural", "Custom", "Random Custom", "None"};
 static const char *LabValues_ASDI[] = {"Auto", "Away", "Towards", "Left", "Right", "Up", "Down"};
 static const char *LabValues_SDIDir[] = {"Auto", "Random", "Away", "Towards", "Left", "Right", "Up", "Down"};
