@@ -312,6 +312,23 @@ void Ledgedash_HUDInit(LedgedashData *event_data)
         // dummy text
         Text_AddSubtext(hud_text, 0, 0, "-");
     }
+    // ---------- NEW: Stick X text (manual positioning) ----------
+    Text *stick_text = Text_CreateText(2, canvas);
+    event_data->hud.text_stick_x = stick_text;
+    stick_text->kerning = 1;
+    stick_text->align = 1;
+    stick_text->use_aspect = 1;
+    
+    Vec3 *scale = &hud_jobj->scale;
+    stick_text->viewport_scale.X = (scale->X * 0.01) * LCLTEXT_SCALE;
+    stick_text->viewport_scale.Y = (scale->Y * 0.01) * LCLTEXT_SCALE;
+    stick_text->aspect.X = 165;
+    
+    // Manual position – tweak as needed
+    stick_text->trans.X = 120.0f;
+    stick_text->trans.Y = -60.0f;
+    
+    Text_AddSubtext(stick_text, 0, 0, "Stick X: -");
 }
 void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
 {
@@ -373,6 +390,11 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
             action = LDACT_NONE;
 
         event_data->action_state.action_log[curr_frame] = action;
+    }
+    // Capture stick X on the first frame of jump
+    if (action == LDACT_JUMP && !event_data->hud.jump_captured) {
+        event_data->hud.stick_x_jump = hmn_data->input.lstick.X;
+        event_data->hud.jump_captured = 1;
     }
 
     // grab airdodge angle
@@ -454,6 +476,9 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         float success_percent = (float)success_count/total_count;
         Text_SetText(event_data->hud.text_count, 0, "%d/%d (%.1f%%)", success_count, total_count, success_percent*100);
 
+        // Display the captured stick X value
+        Text_SetText(event_data->hud.text_stick_x, 0, "Stick X: %.2f", event_data->hud.stick_x_jump);
+        
         // init hitbox num
         LdshHitlogData *hitlog_data = event_data->hitlog_gobj->userdata;
         hitlog_data->num = 0;
@@ -542,6 +567,7 @@ void Ledgedash_InitVariables(LedgedashData *event_data)
     event_data->action_state.is_release = 0;
     event_data->action_state.is_airdodge = 0;
     event_data->action_state.is_finished = 0;
+    event_data->hud.jump_captured = 0;
 
     // init action log
     for (u32 i = 0; i < countof(event_data->action_state.action_log); i++)
