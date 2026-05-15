@@ -26,8 +26,11 @@ struct LedgedashData
         Text *text_angle;
         Text *text_galint;
         Text *text_count;
+        Text *text_stick_x;
         int canvas;
         float airdodge_angle;
+        float stick_x_jump;
+        int jump_captured;
         int total_count;
         int successful_count;
     } hud;
