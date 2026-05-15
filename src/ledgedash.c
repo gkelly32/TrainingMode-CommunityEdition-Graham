@@ -446,11 +446,13 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         event_vars->Tip_Destroy();
 
         // output remaining airdodge angle
-        if (event_data->action_state.is_airdodge == 1)
-            Text_SetText(event_data->hud.text_angle, 0, "%.2f", fabs(event_data->hud.airdodge_angle / M_1DEGREE));
-        else
-            Text_SetText(event_data->hud.text_angle, 0, "-");
+        // if (event_data->action_state.is_airdodge == 1)
+        //     Text_SetText(event_data->hud.text_angle, 0, "%.2f", fabs(event_data->hud.airdodge_angle / M_1DEGREE));
+        // else
+        //     Text_SetText(event_data->hud.text_angle, 0, "-");
 
+        // Replace with this test:
+        Text_SetText(event_data->hud.text_angle, 0, "X:%.2f", event_data->hud.stick_x_jump);
         // output remaining GALINT
         void *matanim;
         Text *text_galint = event_data->hud.text_galint;
