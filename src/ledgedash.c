@@ -390,11 +390,11 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
             action = LDACT_NONE;
 
         event_data->action_state.action_log[curr_frame] = action;
-    }
-    // Capture stick X on the first frame of jump
-    if (action == LDACT_JUMP && !event_data->hud.jump_captured) {
-        event_data->hud.stick_x_jump = hmn_data->input.lstick.X;
-        event_data->hud.jump_captured = 1;
+        // Capture stick X on the first frame of jump
+        if (action == LDACT_JUMP && !event_data->hud.jump_captured) {
+            event_data->hud.stick_x_jump = hmn_data->input.lstick.X;
+            event_data->hud.jump_captured = 1;
+        }
     }
 
     // grab airdodge angle
