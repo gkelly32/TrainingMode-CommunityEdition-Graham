@@ -327,6 +327,8 @@ void Ledgedash_HUDInit(LedgedashData *event_data)
     // Manual position – tweak as needed
     stick_text->trans.X = 120.0f;
     stick_text->trans.Y = -60.0f;
+
+    OSReport("=== Stick X text created at (%.1f, %.1f) ===\n", stick_text->trans.X, stick_text->trans.Y); //debug code
     
     Text_AddSubtext(stick_text, 0, 0, "Stick X: -");
 }
@@ -394,6 +396,7 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         if (action == LDACT_JUMP && !event_data->hud.jump_captured) {
             event_data->hud.stick_x_jump = hmn_data->input.lstick.X;
             event_data->hud.jump_captured = 1;
+            OSReport(">>> Captured stick X at jump: %.2f <<<\n", event_data->hud.stick_x_jump);
         }
     }
 
@@ -477,6 +480,7 @@ void Ledgedash_HUDThink(LedgedashData *event_data, FighterData *hmn_data)
         Text_SetText(event_data->hud.text_count, 0, "%d/%d (%.1f%%)", success_count, total_count, success_percent*100);
 
         // Display the captured stick X value
+        OSReport(">>> Setting stick X text to: %.2f <<<\n", event_data->hud.stick_x_jump);
         Text_SetText(event_data->hud.text_stick_x, 0, "Stick X: %.2f", event_data->hud.stick_x_jump);
         
         // init hitbox num
@@ -568,6 +572,7 @@ void Ledgedash_InitVariables(LedgedashData *event_data)
     event_data->action_state.is_airdodge = 0;
     event_data->action_state.is_finished = 0;
     event_data->hud.jump_captured = 0;
+    OSReport(">>> Reset jump_captured flag <<<\n");
 
     // init action log
     for (u32 i = 0; i < countof(event_data->action_state.action_log); i++)
