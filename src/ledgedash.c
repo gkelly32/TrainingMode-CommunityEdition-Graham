@@ -328,7 +328,7 @@ void Ledgedash_HUDInit(LedgedashData *event_data)
     stick_text->trans.X = 120.0f;
     stick_text->trans.Y = -60.0f;
 
-    `Report("=== Stick X text created at (%.1f, %.1f) ===\n", stick_text->trans.X, stick_text->trans.Y); //debug code
+    OSReport("=== Stick X text created at (%.1f, %.1f) ===\n", stick_text->trans.X, stick_text->trans.Y); //debug code
     
     Text_AddSubtext(stick_text, 0, 0, "Stick X: -");
 }
